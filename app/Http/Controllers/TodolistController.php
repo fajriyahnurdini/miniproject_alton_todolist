@@ -45,6 +45,26 @@ class TodolistController extends Controller
         return redirect()->back();
     }
 
+    // UPDATE: Memperbarui data tugas (Title, Description, Due Date)
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'title'       => 'required|max:255',
+        'description' => 'required',
+        'due_date'    => 'nullable|date',
+    ]);
+
+    $todo = Todolist::findOrFail($id);
+    
+    $todo->update([
+        'title'       => $request->title,
+        'description' => $request->description,
+        'due_date'    => $request->due_date,
+    ]);
+
+    return redirect()->back()->with('success', 'Tugas berhasil diperbarui!');
+}
+
     // DELETE: Menghapus tugas dari database
     public function destroy($id)
     {
@@ -54,3 +74,4 @@ class TodolistController extends Controller
         return redirect()->back()->with('success', 'Tugas berhasil dihapus!');
     }
 }
+

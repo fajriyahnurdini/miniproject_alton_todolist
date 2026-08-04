@@ -26,8 +26,6 @@
                         "on-primary-container": "#3c1989",
                         "outline": "#7a7583",
                         "outline-variant": "#cac4d4",
-                        "error-container": "#ffdad6",
-                        "on-error-container": "#93000a",
                     },
                     "borderRadius": {
                         "xl": "0.75rem",
@@ -125,14 +123,22 @@
                     @endif
                 </div>
 
-                <!-- Delete Action -->
-                <form action="{{ route('todos.destroy', $todo->id) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" onclick="return confirm('Hapus tugas ini?')" class="text-outline hover:text-error opacity-80 group-hover:opacity-100 transition-opacity p-2">
-                        <span class="material-symbols-outlined">delete</span>
+                <!-- Action Buttons: Edit & Delete -->
+                <div class="flex items-center gap-1">
+                    <!-- Tombol Edit (Pensil) -->
+                    <button type="button" onclick="openEditModal({{ $todo->id }}, '{{ addslashes($todo->title) }}', '{{ addslashes($todo->description) }}', '{{ $todo->due_date ? $todo->due_date->format('Y-m-d\TH:i') : '' }}')" class="text-outline hover:text-primary transition-colors p-2">
+                        <span class="material-symbols-outlined">edit</span>
                     </button>
-                </form>
+
+                    <!-- Tombol Hapus -->
+                    <form action="{{ route('todos.destroy', $todo->id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" onclick="return confirm('Hapus tugas ini?')" class="text-outline hover:text-error transition-colors p-2">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         @empty
             <div class="bg-surface-container-lowest rounded-2xl p-8 text-center text-on-surface-variant custom-shadow">
@@ -142,13 +148,49 @@
     </div>
 </main>
 
+<!-- Modal Edit Task -->
+<div id="editModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-lg custom-shadow flex flex-col gap-4">
+        <div class="flex justify-between items-center border-b pb-3">
+            <h2 class="text-xl font-bold text-primary">Edit Tugas</h2>
+            <button onclick="closeEditModal()" class="text-outline hover:text-on-surface font-bold text-xl">&times;</button>
+        </div>
+
+        <form id="editForm" method="POST" class="flex flex-col gap-4">
+            @csrf
+            @method('PUT')
+            
+            <div>
+                <label class="block text-sm font-semibold mb-1">Judul Tugas</label>
+                <input id="editTitle" name="title" required class="w-full p-3 bg-surface border border-gray-200 focus:border-primary-container rounded-xl outline-none" type="text"/>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-1">Deskripsi Tugas</label>
+                <textarea id="editDescription" name="description" required class="w-full p-3 bg-surface border border-gray-200 focus:border-primary-container rounded-xl outline-none resize-none" rows="3"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-1">Tenggat Waktu</label>
+                <input id="editDueDate" name="due_date" class="w-full p-3 bg-surface border border-gray-200 focus:border-primary-container rounded-xl outline-none text-on-surface-variant" type="datetime-local"/>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-2">
+                <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl border border-gray-300 text-on-surface-variant font-medium hover:bg-gray-100 transition-colors">Batal</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-medium hover:bg-primary-container transition-colors">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Footer -->
 <footer class="w-full max-w-container-max mx-auto px-margin-desktop flex flex-col items-center gap-4 py-8 bg-transparent">
     <span class="text-sm text-on-surface-variant">© FlowTask Minimalist Productivity</span>
 </footer>
 
-<!-- Script Search / Filter Client-Side -->
+<!-- JavaScript Functions -->
 <script>
+    // Search Filter
     function filterTasks() {
         const query = document.getElementById('searchInput').value.toLowerCase();
         const tasks = document.querySelectorAll('.task-card');
@@ -163,6 +205,22 @@
                 task.style.display = 'none';
             }
         });
+    }
+
+    // Modal Edit Handler
+    function openEditModal(id, title, description, dueDate) {
+        const form = document.getElementById('editForm');
+        form.action = `/todos/${id}`;
+
+        document.getElementById('editTitle').value = title;
+        document.getElementById('editDescription').value = description;
+        document.getElementById('editDueDate').value = dueDate;
+
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
     }
 </script>
 
