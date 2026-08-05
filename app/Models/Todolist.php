@@ -13,13 +13,13 @@ class Todolist extends Model
    protected $table = 'todolists';
 
     // Kolom yang diizinkan untuk diisi data (Mass Assignment)
-    protected $fillable = [
-        'title',
-        'description',
-        'is_completed',
-        'due_date',
-    ];
-
+  protected $fillable = [
+    'user_id',
+    'title',
+    'description',
+    'is_completed',
+    'due_date',
+];
     // Mengubah due_date menjadi objek Carbon agar mudah diformat
     protected $casts = [
         'due_date' => 'datetime',

@@ -1,228 +1,165 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>FlowTask - My To-Do List</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "error": "#ba1a1a",
-                        "primary": "#674bb5",
-                        "primary-container": "#a78bfa",
-                        "primary-fixed": "#e8ddff",
-                        "surface": "#f8f9ff",
-                        "surface-container-lowest": "#ffffff",
-                        "on-surface": "#121c2a",
-                        "on-surface-variant": "#494552",
-                        "on-primary": "#ffffff",
-                        "on-primary-container": "#3c1989",
-                        "outline": "#7a7583",
-                        "outline-variant": "#cac4d4",
-                    },
-                    "borderRadius": {
-                        "xl": "0.75rem",
-                        "2xl": "1rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "stack-gap": "12px",
-                        "container-max": "800px",
-                        "margin-desktop": "40px",
-                        "margin-mobile": "20px"
-                    }
-                }
-            }
-        }
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My To-Do List</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .custom-shadow {
-            box-shadow: 0 10px 25px -5px rgba(167, 139, 250, 0.1);
+        body {
+            background-color: #f5f3ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-custom {
+            background-color: #e0d5ff;
+            padding: 15px 30px;
+        }
+
+        .card-custom {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-purple {
+            background-color: #9d72ff;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .btn-purple:hover {
+            background-color: #8352ff;
+            color: white;
+        }
+
+        .completed-task {
+            text-decoration: line-through;
+            color: #8c8c8c;
         }
     </style>
 </head>
-<body class="bg-surface text-on-surface min-h-screen font-['Inter'] flex flex-col items-center">
 
-<!-- Header -->
-<header class="w-full bg-primary-fixed text-on-primary-container py-8 px-margin-mobile md:px-margin-desktop mb-8 text-center flex flex-col items-center justify-center">
-    <h1 class="text-3xl md:text-4xl text-primary font-bold">My To-Do List</h1>
-</header>
+<body>
 
-<!-- Main Content Canvas -->
-<main class="w-full max-w-container-max px-margin-mobile md:px-margin-desktop flex flex-col gap-8 flex-grow">
-
-    <!-- Notifikasi Sukses -->
-    @if(session('success'))
-        <div class="w-full p-4 bg-emerald-100 text-emerald-800 rounded-xl font-medium text-sm flex justify-between items-center">
-            <span>{{ session('success') }}</span>
-            <button onclick="this.parentElement.remove()" class="text-emerald-800 font-bold">&times;</button>
-        </div>
-    @endif
-
-    <!-- Search Bar -->
-    <div class="relative w-full">
-        <span class="material-symbols-outlined absolute left-4 top-1/2 transform -translate-y-1/2 text-outline">search</span>
-        <input id="searchInput" onkeyup="filterTasks()" class="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border-2 border-transparent focus:border-primary-container rounded-full custom-shadow outline-none text-base transition-colors" placeholder="Search tasks..." type="text"/>
-    </div>
-
-    <!-- Task Creation Form -->
-    <form action="{{ route('todos.store') }}" method="POST" class="bg-surface-container-lowest rounded-2xl p-6 custom-shadow flex flex-col gap-stack-gap">
-        @csrf
-        <input name="title" required class="w-full p-4 bg-surface-container-lowest border border-gray-100 focus:border-primary-container rounded-xl text-base outline-none transition-colors" placeholder="Task Title" type="text"/>
-        
-        <textarea name="description" required class="w-full p-4 bg-surface-container-lowest border border-gray-100 focus:border-primary-container rounded-xl text-sm outline-none transition-colors resize-none" placeholder="Task Description" rows="3"></textarea>
-        
-        <div class="flex flex-col sm:flex-row gap-4 justify-between items-center">
-            <div class="relative w-full sm:w-auto flex-grow max-w-xs">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-outline">calendar_today</span>
-                <input name="due_date" class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-gray-100 focus:border-primary-container rounded-xl text-sm outline-none transition-colors text-on-surface-variant" type="datetime-local"/>
+    <!-- NAVBAR ATAS (FULL WIDTH) -->
+    <nav class="navbar navbar-custom shadow-sm mb-4">
+        <div class="container-fluid d-flex justify-content-between align-items-center px-4">
+            <div>
+                <h3 class="fw-bold mb-0" style="color: #6f42c1;">My To-Do List</h3>
+                <small class="text-muted">Halo, <strong>{{ Auth::user()->name }}</strong> 👋</small>
             </div>
-            
-            <button type="submit" class="w-full sm:w-auto bg-primary-container hover:bg-primary text-on-primary font-semibold text-lg py-3 px-8 rounded-xl transition-colors duration-200">
-                Add Task
-            </button>
+            <form action="{{ route('logout') }}" method="POST" class="m-0">
+                @csrf
+                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </button>
+            </form>
         </div>
-    </form>
+    </nav>
 
-    <!-- Task List -->
-    <div id="taskList" class="flex flex-col gap-stack-gap w-full pb-16">
-        @forelse ($todos as $todo)
-            <div class="task-card bg-surface-container-lowest rounded-2xl p-4 flex items-start gap-4 custom-shadow hover:shadow-md transition-all group {{ $todo->is_completed ? 'opacity-60' : 'hover:bg-[#EDE9FE]' }}">
-                
-                <!-- Toggle Form Checkbox -->
-                <form action="{{ route('todos.toggle', $todo->id) }}" method="POST" class="mt-1">
-                    @csrf
-                    @method('PATCH')
-                    <input type="checkbox" onchange="this.form.submit()" {{ $todo->is_completed ? 'checked' : '' }} class="w-6 h-6 rounded-full border-2 border-outline-variant text-primary-container focus:ring-primary-container checked:bg-primary-container cursor-pointer transition-colors"/>
-                </form>
+    <!-- KONTEN UTAMA -->
+    <div class="container" style="max-width: 800px;">
 
-                <!-- Task Details -->
-                <div class="flex-grow flex flex-col gap-1">
-                    <h3 class="task-title font-semibold text-lg text-on-surface {{ $todo->is_completed ? 'line-through text-on-surface-variant' : '' }}">
-                        {{ $todo->title }}
-                    </h3>
-                    
-                    <p class="task-desc text-sm text-on-surface-variant whitespace-pre-line {{ $todo->is_completed ? 'line-through' : '' }}">
-                        {{ $todo->description }}
-                    </p>
+        <!-- Alert Success -->
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show rounded-3" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
-                    <!-- Due Date Badge -->
-                    @if($todo->due_date)
-                        <div class="flex items-center mt-2">
-                            <span class="bg-primary-fixed text-primary text-xs font-semibold px-3 py-1 rounded-full">
-                                ⏱️ {{ $todo->due_date->format('d M Y, H:i') }}
-                            </span>
-                        </div>
-                    @endif
+        <!-- Form Tambah Task -->
+        <div class="card card-custom p-4 mb-4">
+            <form action="{{ route('todos.store') }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <input type="text" name="title" class="form-control form-control-lg border-0 bg-light"
+                        placeholder="Judul Tugas..." required>
                 </div>
-
-                <!-- Action Buttons: Edit & Delete -->
-                <div class="flex items-center gap-1">
-                    <!-- Tombol Edit (Pensil) -->
-                    <button type="button" onclick="openEditModal({{ $todo->id }}, '{{ addslashes($todo->title) }}', '{{ addslashes($todo->description) }}', '{{ $todo->due_date ? $todo->due_date->format('Y-m-d\TH:i') : '' }}')" class="text-outline hover:text-primary transition-colors p-2">
-                        <span class="material-symbols-outlined">edit</span>
-                    </button>
-
-                    <!-- Tombol Hapus -->
-                    <form action="{{ route('todos.destroy', $todo->id) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" onclick="return confirm('Hapus tugas ini?')" class="text-outline hover:text-error transition-colors p-2">
-                            <span class="material-symbols-outlined">delete</span>
+                <div class="mb-3">
+                    <textarea name="description" class="form-control border-0 bg-light" rows="3" placeholder="Deskripsi Tugas..."
+                        required></textarea>
+                </div>
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-8">
+                        <input type="datetime-local" name="due_date" class="form-control border-0 bg-light">
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button type="submit" class="btn btn-purple w-100 py-2 fw-bold">
+                            <i class="fas fa-plus me-1"></i> Add Task
                         </button>
-                    </form>
+                    </div>
                 </div>
-            </div>
-        @empty
-            <div class="bg-surface-container-lowest rounded-2xl p-8 text-center text-on-surface-variant custom-shadow">
-                Belum ada tugas. Yuk tambah tugas pertamamu di atas!
-            </div>
-        @endforelse
-    </div>
-</main>
-
-<!-- Modal Edit Task -->
-<div id="editModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
-    <div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-lg custom-shadow flex flex-col gap-4">
-        <div class="flex justify-between items-center border-b pb-3">
-            <h2 class="text-xl font-bold text-primary">Edit Tugas</h2>
-            <button onclick="closeEditModal()" class="text-outline hover:text-on-surface font-bold text-xl">&times;</button>
+            </form>
         </div>
 
-        <form id="editForm" method="POST" class="flex flex-col gap-4">
-            @csrf
-            @method('PUT')
-            
-            <div>
-                <label class="block text-sm font-semibold mb-1">Judul Tugas</label>
-                <input id="editTitle" name="title" required class="w-full p-3 bg-surface border border-gray-200 focus:border-primary-container rounded-xl outline-none" type="text"/>
-            </div>
+        <!-- Daftar Task -->
+        <div class="d-flex flex-column gap-3 mb-5">
+            @forelse($todos as $todo)
+                <div class="card card-custom p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- Toggle Complete -->
+                            <form action="{{ route('todos.toggle', $todo->id) }}" method="POST" class="m-0">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn p-0 border-0">
+                                    @if ($todo->is_completed)
+                                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                                    @else
+                                        <i class="far fa-circle fa-2x text-muted"></i>
+                                    @endif
+                                </button>
+                            </form>
 
-            <div>
-                <label class="block text-sm font-semibold mb-1">Deskripsi Tugas</label>
-                <textarea id="editDescription" name="description" required class="w-full p-3 bg-surface border border-gray-200 focus:border-primary-container rounded-xl outline-none resize-none" rows="3"></textarea>
-            </div>
+                            <!-- Text Task -->
+                            <div>
+                                <h5 class="mb-1 fw-bold {{ $todo->is_completed ? 'completed-task' : '' }}">
+                                    {{ $todo->title }}
+                                </h5>
+                                <p class="mb-1 text-muted {{ $todo->is_completed ? 'completed-task' : '' }}">
+                                    {{ $todo->description }}
+                                </p>
+                                @if ($todo->due_date)
+                                    <small class="text-secondary">
+                                        <i class="far fa-calendar-alt me-1"></i>
+                                        {{ \Carbon\Carbon::parse($todo->due_date)->format('d M Y, H:i') }}
+                                    </small>
+                                @endif
+                            </div>
+                        </div>
 
-            <div>
-                <label class="block text-sm font-semibold mb-1">Tenggat Waktu</label>
-                <input id="editDueDate" name="due_date" class="w-full p-3 bg-surface border border-gray-200 focus:border-primary-container rounded-xl outline-none text-on-surface-variant" type="datetime-local"/>
-            </div>
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <!-- Delete -->
+                            <form action="{{ route('todos.destroy', $todo->id) }}" method="POST" class="m-0">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-link text-danger p-0 ms-2"
+                                    onclick="return confirm('Yakin ingin menghapus tugas ini?')">
+                                    <i class="fas fa-trash-alt fa-lg"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-5 text-muted">
+                    <i class="far fa-folder-open fa-3x mb-3"></i>
+                    <p class="mb-0">Belum ada tugas. Yuk, buat tugas pertama kamu!</p>
+                </div>
+            @endforelse
+        </div>
 
-            <div class="flex justify-end gap-3 mt-2">
-                <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl border border-gray-300 text-on-surface-variant font-medium hover:bg-gray-100 transition-colors">Batal</button>
-                <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-medium hover:bg-primary-container transition-colors">Simpan Perubahan</button>
-            </div>
-        </form>
     </div>
-</div>
 
-<!-- Footer -->
-<footer class="w-full max-w-container-max mx-auto px-margin-desktop flex flex-col items-center gap-4 py-8 bg-transparent">
-    <span class="text-sm text-on-surface-variant">© FlowTask Minimalist Productivity</span>
-</footer>
-
-<!-- JavaScript Functions -->
-<script>
-    // Search Filter
-    function filterTasks() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const tasks = document.querySelectorAll('.task-card');
-
-        tasks.forEach(task => {
-            const title = task.querySelector('.task-title').textContent.toLowerCase();
-            const desc = task.querySelector('.task-desc').textContent.toLowerCase();
-
-            if (title.includes(query) || desc.includes(query)) {
-                task.style.display = 'flex';
-            } else {
-                task.style.display = 'none';
-            }
-        });
-    }
-
-    // Modal Edit Handler
-    function openEditModal(id, title, description, dueDate) {
-        const form = document.getElementById('editForm');
-        form.action = `/todos/${id}`;
-
-        document.getElementById('editTitle').value = title;
-        document.getElementById('editDescription').value = description;
-        document.getElementById('editDueDate').value = dueDate;
-
-        document.getElementById('editModal').classList.remove('hidden');
-    }
-
-    function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
-    }
-</script>
-
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

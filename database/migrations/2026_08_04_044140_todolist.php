@@ -13,10 +13,14 @@ return new class extends Migration
     {
         Schema::create('todolists', function (Blueprint $table) {
             $table->id();
+            
+            // Baris 16: Kolom user_id sebagai relasi ke tabel users
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            
             $table->string('title', 255);
             $table->text('description');
             $table->boolean('is_completed')->default(false);
-            $table->dateTime('due_date')->nullable(); // 🗓️ Kolom deadline
+            $table->dateTime('due_date')->nullable();
             $table->timestamps();
         });
     }
