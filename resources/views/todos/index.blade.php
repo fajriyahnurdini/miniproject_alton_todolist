@@ -46,7 +46,7 @@
 
 <body>
 
-    <!-- NAVBAR ATAS (FULL WIDTH) -->
+    <!-- NAVBAR ATAS -->
     <nav class="navbar navbar-custom shadow-sm mb-4">
         <div class="container-fluid d-flex justify-content-between align-items-center px-4">
             <div>
@@ -99,12 +99,29 @@
         </div>
 
         <!-- Daftar Task -->
+        <!-- Form Search Task -->
+<div class="card card-custom p-3 mb-4">
+    <form action="{{ route('todos.index') }}" method="GET">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control border-0 bg-light" 
+                placeholder="Cari tugas berdasarkan judul..." value="{{ request('search') }}">
+            <button class="btn btn-purple px-4" type="submit">
+                <i class="fas fa-search me-1"></i> Cari
+            </button>
+            @if(request('search'))
+                <a href="{{ route('todos.index') }}" class="btn btn-light border ms-1">
+                    <i class="fas fa-times"></i> Reset
+                </a>
+            @endif
+        </div>
+    </form>
+</div>
         <div class="d-flex flex-column gap-3 mb-5">
             @forelse($todos as $todo)
                 <div class="card card-custom p-3">
                     <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center gap-3">
-                            <!-- Toggle Complete -->
+                        <!-- Sisi Kiri: Checkbox & Teks Tugas (flex-grow-1 agar dorong tombol ke kanan) -->
+                        <div class="d-flex align-items-center gap-3 flex-grow-1 me-3">
                             <form action="{{ route('todos.toggle', $todo->id) }}" method="POST" class="m-0">
                                 @csrf
                                 @method('PATCH')
@@ -117,7 +134,6 @@
                                 </button>
                             </form>
 
-                            <!-- Text Task -->
                             <div>
                                 <h5 class="mb-1 fw-bold {{ $todo->is_completed ? 'completed-task' : '' }}">
                                     {{ $todo->title }}
@@ -134,16 +150,63 @@
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
-                        <div class="d-flex gap-2">
-                            <!-- Delete -->
+                        <!-- Sisi Kanan: Tombol Edit & Hapus Berdampingan -->
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Tombol Trigger Modal Edit -->
+                            <button type="button" class="btn btn-link text-warning p-0 me-2" data-bs-toggle="modal"
+                                data-bs-target="#editModal{{ $todo->id }}">
+                                <i class="fas fa-edit fa-lg"></i>
+                            </button>
+
+                            <!-- Tombol Delete -->
                             <form action="{{ route('todos.destroy', $todo->id) }}" method="POST" class="m-0">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-link text-danger p-0 ms-2"
+                                <button type="submit" class="btn btn-link text-danger p-0"
                                     onclick="return confirm('Yakin ingin menghapus tugas ini?')">
                                     <i class="fas fa-trash-alt fa-lg"></i>
                                 </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL EDIT TASK -->
+                <div class="modal fade" id="editModal{{ $todo->id }}" tabindex="-1"
+                    aria-labelledby="editModalLabel{{ $todo->id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border-0">
+                            <div class="modal-header border-0 pb-0" style="background-color: #f5f3ff;">
+                                <h5 class="modal-title fw-bold" style="color: #6f42c1;">Edit Tugas</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+
+                            //edit form
+                            <form action="{{ route('todos.update', $todo->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted fw-bold">Judul</label>
+                                        <input type="text" name="title" class="form-control"
+                                            value="{{ $todo->title }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted fw-bold">Deskripsi</label>
+                                        <textarea name="description" class="form-control" rows="3">{{ $todo->description }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted fw-bold">Batas Waktu</label>
+                                        <input type="datetime-local" name="due_date" class="form-control"
+                                            value="{{ $todo->due_date ? \Carbon\Carbon::parse($todo->due_date)->format('Y-m-d\TH:i') : '' }}">
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 pt-0">
+                                    <button type="button" class="btn btn-light"
+                                        data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" class="btn btn-purple px-4">Simpan Perubahan</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -158,7 +221,7 @@
 
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap JS (Wajib agar Modal Edit bisa dipencet & terbuka) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
